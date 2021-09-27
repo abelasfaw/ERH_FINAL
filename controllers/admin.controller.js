@@ -1,5 +1,4 @@
 const User = require("../models/user.model");
-//const Institute = require("../models/admin.model");
 const Student = require("../models/student.model");
 const Approver = require("../models/approver.model");
 const Department = require("../models/department.model");
@@ -38,6 +37,7 @@ exports.countPost = async (req, res) => {
 //create admin profile
 exports.createInstituteDetail = async (req, res) => {
     const id = req.params.id;
+    console.log({ id });
     const { address, phone, email, under } = req.body;
 
     if (!address) {
@@ -78,6 +78,8 @@ exports.createInstituteDetail = async (req, res) => {
             });
         }
 
+        console.log(user);
+
         if (user.instituteId) {
             return res.status(400).json({
                 status: "fail",
@@ -89,7 +91,7 @@ exports.createInstituteDetail = async (req, res) => {
         let newAdmin = new Admin({
             username: user.username,
             name: user.name,
-            profilePicture: `localhost:${process.env.APP_PORT}/resource/${req.file.filename}`,
+            profilePicture: "",
             address,
             phone,
             email,
@@ -101,10 +103,11 @@ exports.createInstituteDetail = async (req, res) => {
         newAdmin.userId = user._id;
         user.instituteId = newAdmin._id;
         user.changeProfile = false;
+        user.profileCreated = true;
 
         // 3- save each models
-        await user.save();
         await newAdmin.save();
+        await user.save();
 
         res.status(200).json({
             status: "success",
@@ -112,6 +115,7 @@ exports.createInstituteDetail = async (req, res) => {
             data: newAdmin,
         });
     } catch (err) {
+        console.log(err);
         res.status(500).json({
             err,
         });
@@ -241,7 +245,6 @@ exports.createUser = async (req, res) => {
             role,
             externalUser,
             createdBy: req.userId,
-            institute: req.userId,
         });
 
         newUser

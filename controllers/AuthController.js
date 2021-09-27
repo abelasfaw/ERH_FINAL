@@ -38,10 +38,10 @@ const userLogin = async (req, res) => {
                 SECRET,
                 { expiresIn: "7 days" }
             );
-        } else if (user.profileCreated && user.student != null) {
+        } else if (user.profileCreated && user.studentId != null) {
             console.log("inside student");
             isStudent = true;
-            let student_id = user.student;
+            let student_id = user.studentId;
             var student = await Student.findOne({ _id: student_id });
             var token = jwt.sign(
                 {
@@ -53,9 +53,9 @@ const userLogin = async (req, res) => {
                 SECRET,
                 { expiresIn: "7 days" }
             );
-        } else if (user.profileCreated && user.institute != null) {
+        } else if (user.profileCreated && user.instituteId != null) {
             console.log("inside admin");
-            let institute = user.institute;
+            let institute = user.instituteId;
             var admin = await Admin.findOne({ _id: institute });
             var token = jwt.sign(
                 {

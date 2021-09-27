@@ -91,28 +91,19 @@ exports.showUserProfile = async (req, res) => {
 };
 
 exports.updateProfile = (req, res) => {
-    const {
-        firstname,
-        lastname,
-        gender,
-        profilePicture,
-        phone,
-        email,
-        academiclevel,
-        year,
-    } = req.body;
+    const { name, gender, profilePicture, phone, email, academiclevel, year } =
+        req.body;
+
     const id = req.params.id;
+
     const newData = {
-        firstname,
-        lastname,
+        name,
         gender,
-        profilePicture,
+        profilepicture: profilePicture,
         phone,
         email,
         academiclevel,
         year,
-        institute: institute._id,
-        changeProfile: false,
     };
 
     Student.updateOne({ _id: id }, newData)

@@ -7,16 +7,9 @@ exports.UploadFile = async (req, res) => {
     //  console.log("inside")
 
     const username = req.params.username;
-    const {
-        postname,
-        title,
-        description,
-        department,
-        under,
-        academiclevel,
-        status,
-        state,
-    } = req.body;
+    const { postname, title, description, department, under, academiclevel } =
+        req.body;
+
     const file = req.file.filename;
 
     // console.log("inside 3")
@@ -43,22 +36,32 @@ exports.UploadFile = async (req, res) => {
         });
     }
 
-    if (!status) {
-        //  console.log("er4")
+    if (!description) {
+        //  console.log("er3")
         return res.status(400).json({
             status: "fail",
-            message: "please insert the status level",
+            message: "please insert the description",
         });
     }
+
+    if (!department) {
+        //  console.log("er3")
+        return res.status(400).json({
+            status: "fail",
+            message: "please insert the department",
+        });
+    }
+
     // console.log("inside2")
     const uploader = await Student.findOne({ username });
     console.log("uploader ", uploader);
 
-    let fileName = `localhost:${process.env.APP_PORT}/resource/` + file;
+    let fileName = `localhost:${process.env.APP_PORT}/resource/${file}`;
     //file = fileName
     console.log(fileName);
-    console.log(uploader.institute);
+    console.log(uploader.createdBy);
     let newUpload = new Upload({
+        name: uploader.name,
         username: uploader.username,
         postname,
         file: fileName,
@@ -67,12 +70,10 @@ exports.UploadFile = async (req, res) => {
         department,
         under,
         academiclevel,
-        status,
-        state,
         uploader,
-        institute: uploader.institute,
+        institute: uploader.createdBy,
     });
-    uploader.uploads.push(newUpload._id);
+    uploader.uploads.push(newUpload);
     // newUpload.postedBy = postedBy._id;
     //uploader.uploads = newUpload._id;
     // uploader.Update()
@@ -84,11 +85,12 @@ exports.UploadFile = async (req, res) => {
 
     // }
 
-    await uploader.save();
     await newUpload.save();
+    await uploader.save();
     res.status(200).json({
         status: "success",
         message: "post successfully uploaded",
+        data: newUpload,
     });
 };
 
@@ -138,42 +140,42 @@ exports.findPostBYId = (req, res) => {
 
 exports.ApprovePost = async (req, res) => {
     const postname = req.params.postname;
-    const {
-        file,
-        title,
-        description,
-        department,
-        under,
-        academiclevel,
-        status,
-        state,
-    } = req.body;
+    // const {
+    //     file,
+    //     title,
+    //     description,
+    //     department,
+    //     under,
+    //     academiclevel,
+    //     status,
+    //     state,
+    // } = req.body;
 
     await Upload.updateOne({ postname: postname }, { state: "post" });
 
-    const upload = await Upload.findOne({ postname });
+    // const upload = await Upload.findOne({ postname });
 
-    let newPost = new Upload({
-        postname,
-        file,
-        title,
-        description,
-        department,
-        under,
-        academiclevel,
-        status,
-        state,
-    });
+    // let newPost = new Upload({
+    //     postname,
+    //     file,
+    //     title,
+    //     description,
+    //     department,
+    //     under,
+    //     academiclevel,
+    //     status,
+    //     state,
+    // });
 
-    newPost.upload = upload._id;
-    upload.Upload = newPost._id;
+    // newPost.upload = upload._id;
+    // upload.Upload = newPost._id;
 
-    await upload.save();
-    await newPost.save();
+    // await upload.save();
+    // await newPost.save();
 
     res.status(200).json({
-        status: "succes",
-        message: "successfuly uploaded",
+        status: "success",
+        message: "successfully approved",
     });
 };
 

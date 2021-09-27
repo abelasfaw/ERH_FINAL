@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs");
 
 //const ExternalUser = require('../models/externalUser.model');
 const { eventNames } = require("../models/admin.model");
+const Upload = require("../models/upload.model");
 //Admin.ensureIndexes({name:"text"});
 
 //dashbord part
@@ -29,9 +30,8 @@ exports.countApprover = async (req, res) => {
 
 // get total number of post
 exports.countPost = async (req, res) => {
-    const institute = await User.findById(req.params.id);
-    Post.countDocuments()
-        .then((post) => res.json(post))
+    Upload.countDocuments({ institute: req.userId, state: "post" })
+        .then((institute) => res.json(institute))
         .catch((err) => res.status(400).json("Error:" + err));
 };
 //create admin profile
@@ -178,7 +178,6 @@ exports.getAdminProfile = async (req, res) => {
 exports.getUsers = (req, res) => {
     Student.find({
         externalUser: false,
-        role: "user",
         changeProfile: false,
         createdBy: req.userId,
     })
@@ -189,7 +188,6 @@ exports.getUsers = (req, res) => {
 exports.getExternalUsers = (req, res) => {
     Student.find({
         externalUser: true,
-        role: "user",
         changeProfile: false,
         createdBy: req.userId,
     })
@@ -371,6 +369,18 @@ exports.getApproverById = (req, res) => {
         });
 };
 
+exports.getPostsUnderAdmin = async (req, res) => {
+    try {
+        const posts = await Upload.find({
+            institute: req.userId,
+            state: "post",
+        });
+        res.status(200).json({ success: true, data: posts });
+    } catch (error) {
+        res.status(500).json({ success: false, data: error });
+    }
+};
+
 exports.updateUser = async (req, res) => {
     const id = req.params.id;
     const { password, username } = req.body;
@@ -385,7 +395,7 @@ exports.updateUser = async (req, res) => {
             newData = { password: bcrypt.hashSync(password, 12), username };
         } else {
             const userInfo = await User.findOne({
-                _id: studentToUpdate.userId,
+                _id: studentToUpdate.user,
                 createdBy: req.userId,
             });
             newData = { username, password: userInfo.password };
@@ -394,7 +404,7 @@ exports.updateUser = async (req, res) => {
         await Student.updateOne({ _id: id, createdBy: req.userId }, newData);
         await User.updateOne(
             {
-                _id: studentToUpdate.userId,
+                _id: studentToUpdate.user,
                 createdBy: req.userId,
             },
             newData
@@ -437,7 +447,7 @@ exports.deleteUser = async (req, res) => {
         });
         await Student.deleteOne({ _id: id, createdBy: req.userId });
         await User.deleteOne({
-            _id: studentToDelete.userId,
+            _id: studentToDelete.user,
             createdBy: req.userId,
         });
         res.status(200).json({

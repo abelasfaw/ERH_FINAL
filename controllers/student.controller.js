@@ -43,6 +43,7 @@ exports.createClientProfile = async (req, res) => {
         department: department,
         createdBy: user.createdBy,
         changeProfile: false,
+        externalUser: user.externalUser,
     });
 
     newStudent.user = user._id;

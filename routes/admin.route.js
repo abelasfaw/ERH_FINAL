@@ -116,6 +116,13 @@ router.post(
     [authJwt.verifyToken, authJwt.checkIfUserIsAdmin],
     adminContoller.AddExternal
 );
+
+router.get(
+    "/post-under",
+    [authJwt.verifyToken, authJwt.checkIfUserIsAdmin],
+    adminContoller.getPostsUnderAdmin
+);
+
 router.get("/getAdmin/:username", adminContoller.showProfileByusername);
 router.put("/update/:id", adminContoller.updateUser);
 router.delete("/delete/:id", adminContoller.deleteProfile);

@@ -181,42 +181,42 @@ exports.ApprovePost = async (req, res) => {
 
 exports.DeclinePost = async (req, res) => {
     const postname = req.params.postname;
-    const {
-        file,
-        title,
-        description,
-        department,
-        under,
-        academiclevel,
-        status,
-        state,
-    } = req.body;
+    // const {
+    //     file,
+    //     title,
+    //     description,
+    //     department,
+    //     under,
+    //     academiclevel,
+    //     status,
+    //     state,
+    // } = req.body;
 
     await Upload.updateOne({ postname: postname }, { state: "declined" });
 
-    const upload = await Upload.findOne({ postname });
+    // const upload = await Upload.findOne({ postname });
 
-    let newPost = new Upload({
-        postname,
-        file,
-        title,
-        description,
-        department,
-        under,
-        academiclevel,
-        status,
-        state,
-    });
+    // let newPost = new Upload({
+    //     postname,
+    //     file,
+    //     title,
+    //     description,
+    //     department,
+    //     under,
+    //     academiclevel,
+    //     status,
+    //     state,
+    // });
 
-    newPost.upload = upload._id;
-    upload.Upload = newPost._id;
+    // newPost.upload = upload._id;
+    // upload.Upload = newPost._id;
 
-    await upload.save();
-    await newPost.save();
+    // await upload.save();
+    // await newPost.save();
 
     res.status(200).json({
-        status: "succes",
-        message: "successfuly uploaded",
+        status: "success",
+        message: "successfully declined",
     });
 };
 
@@ -255,20 +255,15 @@ exports.likePost = async (req, res) => {
         });
     } else {
         if (student.like1 == null) {
-            student.like1 =
-                `localhost:${process.env.APP_PORT}/resource/` + upload.file;
+            student.like1 = upload.file;
         } else if (student.like2 == null) {
-            student.like2 =
-                `localhost:${process.env.APP_PORT}/resource/` + upload.file;
+            student.like2 = upload.file;
         } else if (student.like3 == null) {
-            student.like3 =
-                `localhost:${process.env.APP_PORT}/resource/` + upload.file;
+            student.like3 = upload.file;
         } else if (student.like4 == null) {
-            student.like4 =
-                `localhost:${process.env.APP_PORT}/resource/` + upload.file;
+            student.like4 = upload.file;
         } else if (student.like5 == null) {
-            student.like5 =
-                `localhost:${process.env.APP_PORT}/resource/` + upload.file;
+            student.like5 = upload.file;
         } else {
             var l1 = student.like2;
             student.like2 = student.like1;
@@ -277,8 +272,7 @@ exports.likePost = async (req, res) => {
             l1 = student.like4;
             student.like4 = l2;
             student.like5 = l1;
-            student.like1 =
-                `localhost:${process.env.APP_PORT}/resource/` + upload.file;
+            student.like1 = upload.file;
         }
         student.save();
         return res.json({

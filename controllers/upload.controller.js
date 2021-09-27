@@ -150,8 +150,18 @@ exports.ApprovePost = async (req, res) => {
     //     status,
     //     state,
     // } = req.body;
-
-    await Upload.updateOne({ postname: postname }, { state: "post" });
+    try {
+        await Upload.updateOne({ postname: postname }, { state: "post" });
+        res.status(200).json({
+            status: "success",
+            message: "successfully approved",
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "fail",
+            message: "approved failed",
+        });
+    }
 
     // const upload = await Upload.findOne({ postname });
 
@@ -172,11 +182,6 @@ exports.ApprovePost = async (req, res) => {
 
     // await upload.save();
     // await newPost.save();
-
-    res.status(200).json({
-        status: "success",
-        message: "successfully approved",
-    });
 };
 
 exports.DeclinePost = async (req, res) => {
@@ -192,7 +197,18 @@ exports.DeclinePost = async (req, res) => {
     //     state,
     // } = req.body;
 
-    await Upload.updateOne({ postname: postname }, { state: "declined" });
+    try {
+        await Upload.updateOne({ postname: postname }, { state: "declined" });
+        res.status(200).json({
+            status: "success",
+            message: "successfully declined",
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "fail",
+            message: "declined failed",
+        });
+    }
 
     // const upload = await Upload.findOne({ postname });
 
@@ -213,11 +229,6 @@ exports.DeclinePost = async (req, res) => {
 
     // await upload.save();
     // await newPost.save();
-
-    res.status(200).json({
-        status: "success",
-        message: "successfully declined",
-    });
 };
 
 // exports.LikePost = async(req, res)=>{
@@ -296,7 +307,9 @@ exports.search = async (req, res) => {
     console.log("after");
     if (req.query.key == "department") {
         //const history = await Upload.find({state:"decliend",state: "post"});
-        const upload = await Upload.find({ department: req.query.val });
+        const upload = await Upload.find({
+            department: { $regex: req.query.val, $options: "i" },
+        });
         console.log(upload.length);
         if (upload.length > 0) {
             return res.json({
@@ -306,7 +319,7 @@ exports.search = async (req, res) => {
                 },
             });
         } else {
-            return res.json({
+            return res.status(500).json({
                 success: false,
                 data: {
                     message: "Upload not found",
@@ -314,33 +327,29 @@ exports.search = async (req, res) => {
             });
         }
     } else if (req.query.key == "institute") {
-        console.log("inside institute");
+        let results = [];
         try {
             const admins = await Admin.find({
-                $text: { $search: req.query.val },
+                name: { $regex: req.query.val, $options: "i" },
             });
+            // const admins = await Admin.find({
+            //     $text: { $search: req.query.val },
+            // });
             console.log(admins);
             for (var i = 0; i < admins.length; i++) {
                 // TODO: change array to single admin
-                console.log(admins[i]);
-                if (admins[i].name == req.query.val) {
-                    console.log("id: ", admins[i]._id);
-                    const uploads = await Upload.find({
-                        institute: admins[i]._id,
-                    });
-                    console.log(uploads);
-                    return res.json({
-                        success: true,
-                        data: {
-                            uploads,
-                        },
-                    });
+                const upload = await Upload.find({
+                    institute: admins[i]._id,
+                    state: "post",
+                });
+                if (upload.length != 0) {
+                    results.push(...upload);
                 }
             }
             return res.json({
-                success: false,
+                success: true,
                 data: {
-                    message: "Upload not found",
+                    results,
                 },
             });
         } catch (error) {
@@ -355,11 +364,23 @@ exports.search = async (req, res) => {
     } else if (req.query.key == "name") {
         try {
             let results = [];
-            const student = await Student.findOne({ name: req.query.val });
-            console.log("student: ", student.uploads);
-            for (var i = 0; i < student.uploads.length; i++) {
-                results.push(await Upload.findOne({ _id: student.uploads[i] }));
+            console.log(req.query.val);
+            const students = await Student.find({
+                name: { $regex: req.query.val, $options: "i" },
+            });
+            // console.log("student: ", student.uploads);
+            for (let student of students) {
+                for (let upload of student.uploads) {
+                    let result = await Upload.findOne({
+                        _id: upload,
+                        state: "post",
+                    });
+                    if (result != null) {
+                        results.push(result);
+                    }
+                }
             }
+
             //const uploads = await Upload.find({uploader:student._id})
             console.log(results);
             return res.json({

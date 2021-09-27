@@ -8,24 +8,16 @@ const Admin = require("../models/admin.model");
 exports.getAllAdmins = async (req, res) => {
   try {
     const admins = await Admin.find({});
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: admins,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       err: "server error",
     });
   }
-
-  User.find({
-    role: "admin",
-    // instituteId: { $ne: null },
-    // // changeProfile: false,
-  })
-    .then((users) => res.json(users))
-    .catch((err) => res.status(400).json("Error:" + err));
 };
 //count admins
 exports.countAdmins = (req, res) => {

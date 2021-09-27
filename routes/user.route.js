@@ -38,7 +38,7 @@ router.post(
 router.route("/External-list").get(userController.Getrequest);
 
 // check if the user is admin [in middleware]
-router.get("/:_id", userController.getAdminById);
+//router.get("/:_id", userController.getAdminById);
 router.put("/update/:id", userController.updateAdmin);
 router.delete("/delete/:id", userController.deleteAdmin);
 router.get("/total-users", userController.numberOfUsers);

@@ -49,10 +49,10 @@ exports.createClientProfile = async (req, res) => {
     user.student = newStudent._id;
     user.profileCreated = true;
     user.changeProfile = false;
-
-    await user.save();
+    user.studentId = newStudent._id;
 
     await newStudent.save();
+    await user.save();
 
     res.status(200).json({
         status: "success",
@@ -78,6 +78,7 @@ exports.countPost = async (req, res) => {
 exports.showUserProfile = async (req, res) => {
     const _id = req.params._id;
     Student.findById(_id)
+        .populate("department")
         .then((data) => {
             if (!data) res.status(404).send({ message: "id not found" + _id });
             else res.send(data);
